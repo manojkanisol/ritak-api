@@ -3,3 +3,6 @@ langchain-mongodb==0.4.0
 fastapi==0.115.6
 langchain-ollama==0.2.2
 uvicorn==0.34.0
+pydantic==2.10.5
+pymongo==4.10.1
+langchain-core==0.3.30
