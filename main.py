@@ -100,4 +100,4 @@ async def chat_streaming(data:UserPrompt):
         "generated_content": result
     }
 
-uvicorn.run(app)
+# uvicorn.run(app)
