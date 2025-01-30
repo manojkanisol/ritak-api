@@ -1,12 +1,12 @@
-from fastapi import APIRouter, HTTPException,Depends
+from fastapi import APIRouter, HTTPException,Depends,Request,Header
 from langchain_mongodb import MongoDBAtlasVectorSearch
 from langchain_ollama import OllamaEmbeddings
 from langchain_core.documents import Document
 from pymongo import MongoClient
 from ....config import settings
-from ....schemas import KnowledgeBaseText
-from ....core.security import decode_jwt_token
-
+from ....schemas.embedding import KnowledgeBaseText
+from ....core.security import get_token_from_header
+from typing import Optional
 
 #Embedding Model
 embedding_model = OllamaEmbeddings(model="nomic-embed-text:latest")
@@ -31,7 +31,7 @@ mongodb_vector_search = MongoDBAtlasVectorSearch(
 )
 
 @router.post("/generate_embeddings")
-async def generate_embeddings(embedding: KnowledgeBaseText,userId:str = Depends(decode_jwt_token)):
+async def generate_embeddings(embedding: KnowledgeBaseText,userId:str = Depends(get_token_from_header),Authorization:Optional[str] = Header(None)):
    document = Document(
        page_content=embedding.text,
        metadata={"userId":userId}
