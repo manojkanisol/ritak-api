@@ -1,25 +1,17 @@
-import uvicorn
-from fastapi import FastAPI
-from pydantic import BaseModel
+from fastapi import APIRouter, HTTPException,Depends,Request,Header
 from pymongo import MongoClient
 from langchain_mongodb import MongoDBAtlasVectorSearch
-from langchain_ollama import ChatOllama
-from langchain_ollama import OllamaEmbeddings
-from langchain_core.documents import Document
+from langchain_ollama import ChatOllama, OllamaEmbeddings
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
+from ....config import settings
+from ....schemas.chat import UserPrompt
+from ....core.security import get_token_from_header
+from typing import Optional
 
-app = FastAPI()
 
-class Item(BaseModel):
-    dataSource:str
-
-class UserPrompt(BaseModel):
-    prompt:str
-
-#Embedding Model
-embedding_model = OllamaEmbeddings(model="nomic-embed-text:latest")
+router = APIRouter()
 
 #Chat Model
 chat_model = ChatOllama(
@@ -28,8 +20,10 @@ chat_model = ChatOllama(
     num_predict= 1000
 )
 
+embedding_model = OllamaEmbeddings(model="llama3.1:latest")
+
 #Set MongoDB Connection
-client = MongoClient("mongodb://43.225.26.120:27017/?directConnection=true")
+client = MongoClient(settings.mongodb_url)
 
 #MongoDB Database Collection
 DB_NAME = "vector"
@@ -60,25 +54,11 @@ Answer the following question:
 {question}"""
 
 # ROOT Navigation
-@app.get("/")
-async def app_status():
-    return "app is running"
 
-# Convert Data into Embeddings
-@app.post("/generate_embeddings")
-async def generate_embeddings(item:Item):
-   document = Document(
-       page_content=item.dataSource,
-       metadata={"source":"riak-ui"}
-   )
-   mongodb_vector_search.add_documents(documents = [document])
-   return {
-        "response" : "Saved in database"
-    }
 
 # Chat Streaming
-@app.post("/chat_streaming")
-async def chat_streaming(data:UserPrompt):
+@router.post("/chat_streaming")
+async def chat_streaming(data:UserPrompt,userId:str = Depends(get_token_from_header),Authorization:Optional[str] = Header(None)):
     print(data.prompt)
     docs = mongodb_vector_search.similarity_search(query=data.prompt,k=2)
     print(docs)

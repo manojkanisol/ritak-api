@@ -9,7 +9,7 @@ from ....core.security import get_token_from_header
 from typing import Optional
 
 #Embedding Model
-embedding_model = OllamaEmbeddings(model="nomic-embed-text:latest")
+embedding_model = OllamaEmbeddings(model="llama3.1:latest")
 
 router = APIRouter()
 
