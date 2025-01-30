@@ -2,6 +2,10 @@ from typing import Dict, Optional
 import jwt
 from datetime import datetime
 from ..config import settings
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 def refresh_token_from_auth_server(token: str) -> Optional[str]:
     """
@@ -17,7 +21,12 @@ def refresh_token_from_auth_server(token: str) -> Optional[str]:
     # TODO: Implement actual refresh logic with auth server
     return None
 
-def decode_jwt_token(token: str) -> Optional[Dict]:
+def decode_jwt_token(token: str = Depends(oauth2_scheme)) -> str:
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
     """
     Decode and verify a JWT token
     
@@ -35,9 +44,9 @@ def decode_jwt_token(token: str) -> Optional[Dict]:
         if decoded_token.get("exp") and datetime.utcnow().timestamp() > decoded_token["exp"]:
             return None
             
-        return decoded_token
+        return decoded_token.get("sub")
     except jwt.InvalidTokenError:
-        return None
+        return credentials_exception
     except jwt.ExpiredSignatureError:
             # Call auth server to refresh token
             # This is a placeholder - implement actual refresh logic
@@ -46,4 +55,4 @@ def decode_jwt_token(token: str) -> Optional[Dict]:
                 return decode_jwt_token(new_token)
             return None
     except jwt.InvalidTokenError:
-            return None
+            return credentials_exception
