@@ -19,7 +19,7 @@ class UserPrompt(BaseModel):
     prompt:str
 
 #Embedding Model
-embedding_model = OllamaEmbeddings(model="llama3.1:latest")
+embedding_model = OllamaEmbeddings(model="nomic-embed-text:latest")
 
 #Chat Model
 chat_model = ChatOllama(
@@ -79,9 +79,9 @@ async def generate_embeddings(item:Item):
 # Chat Streaming
 @app.post("/chat_streaming")
 async def chat_streaming(data:UserPrompt):
-
+    print(data.prompt)
     docs = mongodb_vector_search.similarity_search(query=data.prompt,k=2)
-
+    print(docs)
     rag_prompt = ChatPromptTemplate.from_template(RAG_TEMPLATE)
 
     def format_docs(docs):
@@ -100,4 +100,4 @@ async def chat_streaming(data:UserPrompt):
         "generated_content": result
     }
 
-# uvicorn.run(app)
+uvicorn.run(app)

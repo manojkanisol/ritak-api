@@ -6,3 +6,9 @@ uvicorn==0.34.0
 pydantic==2.10.5
 pymongo==4.10.1
 langchain-core==0.3.30
+pydantic-settings==2.7.0
+pydantic[email]==2.10.5
+pyjwt==2.8.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.20
+python-dotenv==1.0.1
