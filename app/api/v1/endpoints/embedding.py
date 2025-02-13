@@ -7,9 +7,12 @@ from ....config import settings
 from ....schemas.embedding import KnowledgeBaseText
 from ....core.security import get_token_from_header
 from typing import Optional
+from langchain_aws import BedrockEmbeddings
 
 #Embedding Model
 embedding_model = OllamaEmbeddings(model="llama3.1:latest")
+
+embedding_model_aws = BedrockEmbeddings(credentials_profile_name="default",region_name="us-east-1")
 
 router = APIRouter()
 

@@ -9,7 +9,8 @@ from ....config import settings
 from ....schemas.chat import UserPrompt
 from ....core.security import get_token_from_header
 from typing import Optional
-
+from langchain_aws import BedrockEmbeddings
+from langchain_aws.chat_models.bedrock import ChatBedrock
 
 router = APIRouter()
 
@@ -20,7 +21,14 @@ chat_model = ChatOllama(
     num_predict= 1000
 )
 
+chat_model_aws = ChatBedrock(
+    credentials_profile_name="default",
+    region="us-east-1",
+    model="us.meta.llama3-1-8b-instruct-v1:0"
+)
+
 embedding_model = OllamaEmbeddings(model="llama3.1:latest")
+embedding_model_aws = BedrockEmbeddings(credentials_profile_name="default",region_name="us-east-1")
 
 #Set MongoDB Connection
 client = MongoClient(settings.mongodb_url)
